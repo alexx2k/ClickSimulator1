@@ -62,23 +62,6 @@ clickSizeConstraint.MinSize = Vector2.new(180, 80)
 clickSizeConstraint.MaxSize = Vector2.new(320, 110)
 clickSizeConstraint.Parent = clickButton
 
-local statsPill = Instance.new("TextLabel")
-statsPill.AnchorPoint = Vector2.new(0.5, 0)
-statsPill.Position = UDim2.new(0.5, 0, 0, 22)
-statsPill.Size = UDim2.new(0.5, 0, 0, 48)
-statsPill.BackgroundColor3 = Color3.fromRGB(29, 32, 44)
-statsPill.BackgroundTransparency = 0.08
-statsPill.TextColor3 = Color3.new(1, 1, 1)
-statsPill.Font = Enum.Font.GothamBold
-statsPill.TextScaled = true
-statsPill.Parent = gui
-round(statsPill, 16)
-
-local statsConstraint = Instance.new("UISizeConstraint")
-statsConstraint.MinSize = Vector2.new(260, 44)
-statsConstraint.MaxSize = Vector2.new(520, 52)
-statsConstraint.Parent = statsPill
-
 local upgradesButton = Instance.new("TextButton")
 upgradesButton.AnchorPoint = Vector2.new(0, 1)
 upgradesButton.Position = UDim2.new(0, 24, 1, -24)
@@ -259,12 +242,6 @@ local function updateUI()
 	local upgradeCost = Config.GetClickPowerCost(clickPower.Value)
 	local nextRebirthCost = Config.GetRebirthCost(rebirths.Value)
 
-	statsPill.Text = string.format(
-		"%s Clicks   •   %d Rebirths   •   x%d",
-		formatNumber(clicks.Value),
-		rebirths.Value,
-		multiplier
-	)
 
 	level.Text = string.format("Level %d  •  +%s per click", clickPower.Value - 1, formatNumber(gain))
 	buy.Text = "UPGRADE - " .. formatNumber(upgradeCost) .. " CLICKS"
