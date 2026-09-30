@@ -24,11 +24,12 @@ local function getRemote(name)
 end
 
 local clickEvent = getRemote("Click")
+local clickConfirmed = getRemote("ClickConfirmed")
 local buyClickPower = getRemote("BuyClickPower")
 local rebirthEvent = getRemote("Rebirth")
 local feedbackEvent = getRemote("Feedback")
 
-local lastClicks = {}
+local clickBuckets = {}
 
 local function getValues(player)
 	local leaderstats = player:FindFirstChild("leaderstats")
@@ -37,11 +38,36 @@ local function getValues(player)
 		return
 	end
 
-	local clicks = leaderstats:FindFirstChild("Clicks")
-	local rebirths = leaderstats:FindFirstChild("Rebirths")
-	local clickPower = upgrades:FindFirstChild("ClickPower")
+	return leaderstats:FindFirstChild("Clicks"),
+		leaderstats:FindFirstChild("Rebirths"),
+		upgrades:FindFirstChild("ClickPower")
+end
 
-	return clicks, rebirths, clickPower
+local function consumeClickToken(player)
+	local now = os.clock()
+	local bucket = clickBuckets[player]
+
+	if not bucket then
+		bucket = {
+			tokens = Config.ClickBurstCapacity,
+			lastUpdate = now,
+		}
+		clickBuckets[player] = bucket
+	end
+
+	local elapsed = math.max(0, now - bucket.lastUpdate)
+	bucket.lastUpdate = now
+	bucket.tokens = math.min(
+		Config.ClickBurstCapacity,
+		bucket.tokens + elapsed * Config.ClicksPerSecond
+	)
+
+	if bucket.tokens < 1 then
+		return false
+	end
+
+	bucket.tokens -= 1
+	return true
 end
 
 local function savePlayer(player)
@@ -122,25 +148,22 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	savePlayer(player)
-	lastClicks[player] = nil
+	clickBuckets[player] = nil
 end)
 
 clickEvent.OnServerEvent:Connect(function(player)
-	local now = os.clock()
-	local minimumDelay = 1 / Config.MaxClicksPerSecond
-
-	if lastClicks[player] and now - lastClicks[player] < minimumDelay then
+	if not consumeClickToken(player) then
 		return
 	end
-	lastClicks[player] = now
 
 	local clicks, rebirths, clickPower = getValues(player)
 	if not clicks or not rebirths or not clickPower then
 		return
 	end
 
-	local multiplier = Config.GetRebirthMultiplier(rebirths.Value)
-	clicks.Value += clickPower.Value * multiplier
+	local gain = Config.GetClickGain(clickPower.Value, rebirths.Value)
+	clicks.Value += gain
+	clickConfirmed:FireClient(player, gain)
 end)
 
 buyClickPower.OnServerEvent:Connect(function(player)
