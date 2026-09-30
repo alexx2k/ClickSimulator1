@@ -3,16 +3,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local guiParent = player:WaitForChild("PlayerGui")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
-local clickEvent = remotes:WaitForChild("Click")
-local buyClickPower = remotes:WaitForChild("BuyClickPower")
+local clickRemote = remotes:WaitForChild("Click")
+local buyRemote = remotes:WaitForChild("BuyClickPower")
 
 local clicks = player:WaitForChild("leaderstats"):WaitForChild("Clicks")
 local clickPower = player:WaitForChild("Upgrades"):WaitForChild("ClickPower")
 
-local function corner(parent, radius)
+local function round(parent, radius)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, radius)
 	c.Parent = parent
@@ -21,22 +21,28 @@ end
 local gui = Instance.new("ScreenGui")
 gui.Name = "ClickSimulatorUI"
 gui.ResetOnSpawn = false
-gui.Parent = playerGui
+gui.IgnoreGuiInset = false
+gui.Parent = guiParent
 
 local counter = Instance.new("TextLabel")
 counter.AnchorPoint = Vector2.new(0.5, 0.5)
-counter.Position = UDim2.fromScale(0.5, 0.35)
-counter.Size = UDim2.fromOffset(420, 80)
+counter.Position = UDim2.fromScale(0.5, 0.58)
+counter.Size = UDim2.new(0.7, 0, 0, 64)
 counter.BackgroundTransparency = 1
 counter.Font = Enum.Font.GothamBold
 counter.TextColor3 = Color3.new(1, 1, 1)
 counter.TextScaled = true
 counter.Parent = gui
 
+local counterConstraint = Instance.new("UITextSizeConstraint")
+counterConstraint.MaxTextSize = 42
+counterConstraint.MinTextSize = 18
+counterConstraint.Parent = counter
+
 local clickButton = Instance.new("TextButton")
 clickButton.AnchorPoint = Vector2.new(0.5, 0.5)
-clickButton.Position = UDim2.fromScale(0.5, 0.55)
-clickButton.Size = UDim2.fromOffset(280, 110)
+clickButton.Position = UDim2.fromScale(0.5, 0.76)
+clickButton.Size = UDim2.new(0.32, 0, 0, 96)
 clickButton.BackgroundColor3 = Color3.fromRGB(78, 118, 255)
 clickButton.TextColor3 = Color3.new(1, 1, 1)
 clickButton.Font = Enum.Font.GothamBlack
@@ -44,32 +50,47 @@ clickButton.Text = "CLICK!"
 clickButton.TextScaled = true
 clickButton.AutoButtonColor = false
 clickButton.Parent = gui
-corner(clickButton, 22)
+round(clickButton, 22)
+
+local clickSizeConstraint = Instance.new("UISizeConstraint")
+clickSizeConstraint.MinSize = Vector2.new(180, 80)
+clickSizeConstraint.MaxSize = Vector2.new(320, 110)
+clickSizeConstraint.Parent = clickButton
 
 local upgradesButton = Instance.new("TextButton")
 upgradesButton.AnchorPoint = Vector2.new(0, 1)
-upgradesButton.Position = UDim2.new(0, 30, 1, -30)
-upgradesButton.Size = UDim2.fromOffset(190, 60)
+upgradesButton.Position = UDim2.new(0, 24, 1, -24)
+upgradesButton.Size = UDim2.fromOffset(180, 56)
 upgradesButton.BackgroundColor3 = Color3.fromRGB(44, 48, 65)
 upgradesButton.TextColor3 = Color3.new(1, 1, 1)
 upgradesButton.Font = Enum.Font.GothamBold
 upgradesButton.Text = "UPGRADES"
 upgradesButton.TextScaled = true
 upgradesButton.Parent = gui
-corner(upgradesButton, 14)
+round(upgradesButton, 14)
 
 local menu = Instance.new("Frame")
 menu.AnchorPoint = Vector2.new(0.5, 0.5)
 menu.Position = UDim2.fromScale(0.5, 0.5)
-menu.Size = UDim2.fromOffset(520, 350)
+menu.Size = UDim2.new(0.88, 0, 0.62, 0)
 menu.BackgroundColor3 = Color3.fromRGB(29, 32, 44)
 menu.Visible = false
+menu.ClipsDescendants = true
 menu.Parent = gui
-corner(menu, 22)
+round(menu, 22)
+
+local menuConstraint = Instance.new("UISizeConstraint")
+menuConstraint.MinSize = Vector2.new(330, 290)
+menuConstraint.MaxSize = Vector2.new(560, 400)
+menuConstraint.Parent = menu
+
+local menuScale = Instance.new("UIScale")
+menuScale.Scale = 1
+menuScale.Parent = menu
 
 local title = Instance.new("TextLabel")
-title.Position = UDim2.fromOffset(24, 18)
-title.Size = UDim2.new(1, -100, 0, 52)
+title.Position = UDim2.fromOffset(22, 16)
+title.Size = UDim2.new(1, -92, 0, 48)
 title.BackgroundTransparency = 1
 title.Text = "UPGRADES"
 title.TextColor3 = Color3.new(1, 1, 1)
@@ -80,26 +101,26 @@ title.Parent = menu
 
 local close = Instance.new("TextButton")
 close.AnchorPoint = Vector2.new(1, 0)
-close.Position = UDim2.new(1, -18, 0, 18)
-close.Size = UDim2.fromOffset(50, 50)
+close.Position = UDim2.new(1, -16, 0, 16)
+close.Size = UDim2.fromOffset(46, 46)
 close.BackgroundColor3 = Color3.fromRGB(55, 59, 78)
 close.Text = "X"
 close.TextColor3 = Color3.new(1, 1, 1)
 close.Font = Enum.Font.GothamBold
 close.TextScaled = true
 close.Parent = menu
-corner(close, 12)
+round(close, 12)
 
 local card = Instance.new("Frame")
-card.Position = UDim2.fromOffset(24, 95)
-card.Size = UDim2.new(1, -48, 0, 150)
+card.Position = UDim2.fromOffset(22, 84)
+card.Size = UDim2.new(1, -44, 1, -106)
 card.BackgroundColor3 = Color3.fromRGB(40, 44, 59)
 card.Parent = menu
-corner(card, 16)
+round(card, 16)
 
 local upgradeName = Instance.new("TextLabel")
-upgradeName.Position = UDim2.fromOffset(18, 16)
-upgradeName.Size = UDim2.new(0.5, 0, 0, 38)
+upgradeName.Position = UDim2.fromOffset(18, 14)
+upgradeName.Size = UDim2.new(1, -36, 0, 34)
 upgradeName.BackgroundTransparency = 1
 upgradeName.Text = "CLICK POWER"
 upgradeName.TextColor3 = Color3.new(1, 1, 1)
@@ -109,8 +130,8 @@ upgradeName.TextScaled = true
 upgradeName.Parent = card
 
 local level = Instance.new("TextLabel")
-level.Position = UDim2.fromOffset(18, 61)
-level.Size = UDim2.new(0.42, 0, 0, 28)
+level.Position = UDim2.fromOffset(18, 56)
+level.Size = UDim2.new(1, -36, 0, 28)
 level.BackgroundTransparency = 1
 level.TextColor3 = Color3.fromRGB(190, 194, 215)
 level.TextXAlignment = Enum.TextXAlignment.Left
@@ -119,56 +140,60 @@ level.TextScaled = true
 level.Parent = card
 
 local buy = Instance.new("TextButton")
-buy.AnchorPoint = Vector2.new(1, 0.5)
-buy.Position = UDim2.new(1, -18, 0.5, 0)
-buy.Size = UDim2.fromOffset(235, 70)
+buy.AnchorPoint = Vector2.new(0.5, 1)
+buy.Position = UDim2.new(0.5, 0, 1, -16)
+buy.Size = UDim2.new(1, -36, 0, 58)
 buy.BackgroundColor3 = Color3.fromRGB(63, 190, 112)
 buy.TextColor3 = Color3.new(1, 1, 1)
 buy.Font = Enum.Font.GothamBold
 buy.TextScaled = true
 buy.Parent = card
-corner(buy, 14)
+round(buy, 14)
 
 local function updateUI()
-	counter.Text = string.format("%d Clicks", clicks.Value)
-	level.Text = string.format("Level %d  •  +%d/click", clickPower.Value - 1, clickPower.Value)
-	buy.Text = string.format("UPGRADE\n%d CLICKS", Config.GetClickPowerCost(clickPower.Value))
+	counter.Text = tostring(clicks.Value) .. " Clicks"
+	level.Text = string.format("Level %d  •  +%d per click", clickPower.Value - 1, clickPower.Value)
+	buy.Text = string.format("UPGRADE - %d CLICKS", Config.GetClickPowerCost(clickPower.Value))
 end
 
 local function floatingGain(amount)
 	local label = Instance.new("TextLabel")
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
-	label.Position = UDim2.new(0.5, math.random(-80, 80), 0.46, 0)
-	label.Size = UDim2.fromOffset(120, 50)
+	label.Position = UDim2.new(0.5, 0, 0.66, 0)
+	label.Size = UDim2.fromOffset(110, 42)
 	label.BackgroundTransparency = 1
-	label.Text = "+" .. amount
+	label.Text = "+" .. tostring(amount)
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.Font = Enum.Font.GothamBold
 	label.TextScaled = true
 	label.Parent = gui
 
-	local tween = TweenService:Create(label, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = label.Position - UDim2.fromOffset(0, 90),
+	local target = label.Position - UDim2.fromOffset(0, 80)
+	local tween = TweenService:Create(label, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = target,
 		TextTransparency = 1,
 	})
 	tween:Play()
-	tween.Completed:Once(function() label:Destroy() end)
+	tween.Completed:Once(function()
+		label:Destroy()
+	end)
 end
 
-local buttonSize = clickButton.Size
 clickButton.Activated:Connect(function()
-	clickEvent:FireServer()
+	clickRemote:FireServer()
 	floatingGain(clickPower.Value)
-	TweenService:Create(clickButton, TweenInfo.new(0.05), {Size = UDim2.fromOffset(255, 96)}):Play()
-	task.delay(0.05, function()
-		TweenService:Create(clickButton, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = buttonSize}):Play()
+
+	local original = clickButton.Size
+	TweenService:Create(clickButton, TweenInfo.new(0.05), {Size = UDim2.new(original.X.Scale * 0.94, 0, original.Y.Scale, math.max(72, original.Y.Offset - 8))}):Play()
+	task.delay(0.06, function()
+		TweenService:Create(clickButton, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = original}):Play()
 	end)
 end)
 
 upgradesButton.Activated:Connect(function()
 	menu.Visible = true
-	menu.Size = UDim2.fromOffset(450, 300)
-	TweenService:Create(menu, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(520, 350)}):Play()
+	menuScale.Scale = 0.88
+	TweenService:Create(menuScale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 end)
 
 close.Activated:Connect(function()
@@ -176,7 +201,7 @@ close.Activated:Connect(function()
 end)
 
 buy.Activated:Connect(function()
-	buyClickPower:FireServer()
+	buyRemote:FireServer()
 end)
 
 clicks:GetPropertyChangedSignal("Value"):Connect(updateUI)
