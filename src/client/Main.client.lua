@@ -27,12 +27,24 @@ gui.Parent = guiParent
 local counter = Instance.new("TextLabel")
 counter.AnchorPoint = Vector2.new(0.5, 0.5)
 counter.Position = UDim2.fromScale(0.5, 0.58)
-counter.Size = UDim2.new(0.7, 0, 0, 64)
-counter.BackgroundTransparency = 1
+counter.Size = UDim2.new(0.56, 0, 0, 64)
+counter.BackgroundColor3 = Color3.fromRGB(29, 32, 44)
+counter.BackgroundTransparency = 0.08
 counter.Font = Enum.Font.GothamBold
 counter.TextColor3 = Color3.new(1, 1, 1)
 counter.TextScaled = true
 counter.Parent = gui
+round(counter, 18)
+
+local counterStroke = Instance.new("UIStroke")
+counterStroke.Thickness = 2
+counterStroke.Transparency = 0.45
+counterStroke.Parent = counter
+
+local counterSize = Instance.new("UISizeConstraint")
+counterSize.MinSize = Vector2.new(220, 60)
+counterSize.MaxSize = Vector2.new(440, 70)
+counterSize.Parent = counter
 
 local counterConstraint = Instance.new("UITextSizeConstraint")
 counterConstraint.MaxTextSize = 42
