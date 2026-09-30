@@ -9,7 +9,8 @@ local guiParent = player:WaitForChild("PlayerGui")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 
-local clickRemote = remotes:WaitForChild("Click")\nlocal clickConfirmed = remotes:WaitForChild("ClickConfirmed")
+local clickRemote = remotes:WaitForChild("Click")
+local clickConfirmed = remotes:WaitForChild("ClickConfirmed")
 local buyRemote = remotes:WaitForChild("BuyClickPower")
 local rebirthRemote = remotes:WaitForChild("Rebirth")
 local feedbackRemote = remotes:WaitForChild("Feedback")
@@ -291,7 +292,8 @@ local function floatingGain(amount)
 	end)
 end
 
-local function performClick()\n\tclickRemote:FireServer()
+local function performClick()
+	clickRemote:FireServer()
 
 	local original = clickButton.Size
 	TweenService:Create(clickButton, TweenInfo.new(0.05), {
@@ -305,7 +307,11 @@ local function performClick()\n\tclickRemote:FireServer()
 	end)
 end
 
-clickConfirmed.OnClientEvent:Connect(function(gain)\n\tfloatingGain(gain)\nend)\n\nclickButton.Activated:Connect(performClick)
+clickConfirmed.OnClientEvent:Connect(function(gain)
+	floatingGain(gain)
+end)
+
+clickButton.Activated:Connect(performClick)
 
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
